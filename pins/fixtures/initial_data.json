@@ -1,0 +1,54 @@
+[
+    {
+        "model": "pins.series",
+        "pk": 1,
+        "fields": {
+            "name": "Disney Collection",
+            "description": "Pins from various Disney movies."
+        }
+    },
+    {
+        "model": "pins.series",
+        "pk": 2,
+        "fields": {
+            "name": "Superhero Collection",
+            "description": "Pins featuring popular superheroes."
+        }
+    },
+    {
+        "model": "pins.pin",
+        "pk": 1,
+        "fields": {
+            "name": "Mickey Mouse Pin",
+            "series": 1,
+            "rarity": "Common",
+            "origin": "Disney Store",
+            "edition": "Standard Edition",
+            "release_date": "2020-01-01",
+            "original_price": 10.00,
+            "sku": "SKU001",
+            "description": "A classic pin featuring Mickey Mouse.",
+            "image_url": "",
+            "image": "pin_images/mickey_mouse.jpg",
+            "tags": "Disney, Mickey"
+        }
+    },
+    {
+        "model": "pins.pin",
+        "pk": 2,
+        "fields": {
+            "name": "Spider-Man Pin",
+            "series": 2,
+            "rarity": "Rare",
+            "origin": "Comic Con",
+            "edition": "Limited Edition 500",
+            "release_date": "2021-07-15",
+            "original_price": 25.00,
+            "sku": "SKU002",
+            "description": "A collectible pin featuring Spider-Man.",
+            "image_url": "",
+            "image": "pin_images/spider_man.jpg",
+            "tags": "Superhero, Spider-Man"
+        }
+    }
+]

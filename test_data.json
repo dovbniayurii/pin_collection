@@ -1,0 +1,21 @@
+[
+    {
+      "model": "users.customuser",
+      "pk": 1,
+      "fields": {
+        "useremail": "testuser@example.com",
+        "password": "password123",
+        "is_active": true
+      }
+    },
+    {
+      "model": "users.customuser",
+      "pk": 2,
+      "fields": {
+        "useremail": "anotheruser@example.com",
+        "password": "password456",
+        "is_active": true
+      }
+    }
+  ]
+  
