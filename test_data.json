@@ -1,21 +1,83 @@
 [
-    {
-      "model": "users.customuser",
-      "pk": 1,
-      "fields": {
-        "useremail": "testuser@example.com",
-        "password": "password123",
-        "is_active": true
-      }
-    },
-    {
-      "model": "users.customuser",
-      "pk": 2,
-      "fields": {
-        "useremail": "anotheruser@example.com",
-        "password": "password456",
-        "is_active": true
-      }
+  {
+    "model": "users.pinuser",
+    "pk": 1,
+    "fields": {
+      "useremail": "testuser@example.com",
+      "password": "password123",
+      "is_active": true
     }
-  ]
-  
+  },
+  {
+    "model": "users.pinuser",
+    "pk": 3,
+    "fields": {
+      "useremail": "newuser@example.com",
+      "password": "password789",
+      "is_active": false
+    }
+  },
+  {
+    "model": "users.pinuser",
+    "pk": 2,
+    "fields": {
+      "useremail": "anotheruser@example.com",
+      "password": "password456",
+      "is_active": true
+    }
+  },
+  {
+    "model": "pins.pin",
+    "pk": 1,
+    "fields": {
+      "name": "Mystic Dragon",
+      "series_name": "Legends of the Sky",
+      "rarity": "Rare",
+      "origin": "Fantasy Realm",
+      "edition": "First Edition",
+      "release_date": "2022-05-15",
+      "original_price": 49.99,
+      "sku": "MD12345",
+      "description": "A powerful dragon known for its mystical abilities.",
+      "image_url": "http://example.com/images/mystic_dragon.jpg",
+      "image": "pin_images/mystic_dragon.jpg",
+      "tags": "dragon, fantasy, rare, collectible"
+    }
+  },
+  {
+    "model": "pins.pin",
+    "pk": 2,
+    "fields": {
+      "name": "Enchanted Forest",
+      "series_name": "Nature's Wonders",
+      "rarity": "Common",
+      "origin": "Magical Woods",
+      "edition": "Limited Edition",
+      "release_date": "2023-03-10",
+      "original_price": 19.99,
+      "sku": "",
+      "description": "A beautiful forest filled with magical creatures.",
+      "image_url": "http://example.com/images/enchanted_forest.jpg",
+      "image": "pin_images/enchanted_forest.jpg",
+      "tags": "forest, nature, magical, common"
+    }
+  },
+  {
+    "model": "pins.pin",
+    "pk": 3,
+    "fields": {
+      "name": "Silver Knight",
+      "series_name": "Heroes of Valor",
+      "rarity": "Uncommon",
+      "origin": "Medieval Europe",
+      "edition": "",
+      "release_date": "2023-01-20",
+      "original_price": 29.99,
+      "sku": "SK67890",
+      "description": "An armored knight wielding a silver sword.",
+      "image_url": "http://example.com/images/silver_knight.jpg",
+      "image": "pin_images/silver_knight.jpg",
+      "tags": "knight, medieval, valor, collectible"
+    }
+  }
+]

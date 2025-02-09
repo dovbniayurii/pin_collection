@@ -38,7 +38,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'my_django_project.urls'
+ROOT_URLCONF = 'pin_tracker_app.urls'
 
 TEMPLATES = [
     {
@@ -56,7 +56,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'my_django_project.wsgi.application'
+WSGI_APPLICATION = 'pin_tracker_app.wsgi.application'
 
 DATABASES = {
     'default': {

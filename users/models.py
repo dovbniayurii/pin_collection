@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
-class CustomUserManager(BaseUserManager):
+class PinUserManager(BaseUserManager):
     def create_user(self, useremail, password=None):
         if not useremail:
             raise ValueError(_('The Useremail field must be set'))
@@ -17,12 +17,12 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class CustomUser(AbstractBaseUser):
+class PinUser(AbstractBaseUser):
     useremail = models.EmailField(unique=True, max_length=255)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
-    objects = CustomUserManager()
+    objects = PinUserManager()
 
     USERNAME_FIELD = 'useremail'
     REQUIRED_FIELDS = []

@@ -1,5 +1,5 @@
 """
-ASGI config for my_django_project.
+ASGI config for pin_tracker_app.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -10,6 +10,6 @@ https://docs.djangoproject.com/en/stable/howto/deployment/asgi/
 import os
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'my_django_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pin_tracker_app.settings')
 
 application = get_asgi_application()
