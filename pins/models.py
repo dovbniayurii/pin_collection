@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import CustomUser
 
 class Series(models.Model):
     name = models.CharField(max_length=255)
@@ -38,7 +38,7 @@ class Pin(models.Model):
         """Utility method to get tags as a list"""
         return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
 class UserCollection(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
@@ -47,7 +47,7 @@ class UserCollection(models.Model):
 
 
 class Wishlist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 

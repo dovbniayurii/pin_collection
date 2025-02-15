@@ -39,3 +39,25 @@ class CustomUser(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+
+
+from django.db import models
+from django.utils import timezone
+import random
+import string
+
+class OTP(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    @classmethod
+    def generate_otp(cls, user):
+        otp_value = ''.join(random.choices(string.digits, k=6))  # Generate a 6-digit OTP
+        expires_at = timezone.now() + timezone.timedelta(minutes=10)  # OTP expires in 10 minutes
+        otp_instance = cls.objects.create(user=user, otp=otp_value, expires_at=expires_at)
+        return otp_instance
