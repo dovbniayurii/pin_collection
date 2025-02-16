@@ -43,7 +43,7 @@ class UserCollection(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.pin.name}"
+        return f"{self.user.useremail} - {self.pin.name}"
 
 
 class Wishlist(models.Model):
@@ -52,4 +52,16 @@ class Wishlist(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - Wishlist - {self.pin.name}"
+        return f"{self.user.useremail} - Wishlist - {self.pin.name}"
+class TradingBoard(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
+    status = models.CharField(max_length=50, choices=[
+        ('available', 'Available'),
+        ('pending', 'Pending Trade'),
+        ('traded', 'Traded')
+    ], default='available')
+    listed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.useremail} - Trading - {self.pin.name}"
