@@ -67,13 +67,6 @@ class UserCollectionAPIView(APIView):
         user_collection = UserCollection.objects.filter(user=request.user)
         serializer = UserCollectionSerializer(user_collection, many=True)
         return Response(serializer.data)
-    def get(self, request,pin_id):
-        try:
-            pin_details = UserCollection.objects.get(user=request.user, pin__id=pin_id)
-            serializer = PinSerializer(pin_details.pin)  # Serialize the related pin object
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except UserCollection.DoesNotExist:
-            return Response({"error": "Pin not found in your collection."}, status=status.HTTP_404_NOT_FOUND)
     # Add a pin to the user's collection (POST method)
     #@swagger_auto_schema(
      #   request_body=UserCollectionSerializer,  # Only for methods that send data
@@ -87,6 +80,18 @@ class UserCollectionAPIView(APIView):
          #   return Response(serializer.data, status=status.HTTP_201_CREATED)
         # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserPinDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(responses={200: PinSerializer()})
+    def get(self, request, pin_id):
+        """Get details of a specific pin in the user's collection."""
+        try:
+            pin_details = UserCollection.objects.get(user=request.user, pin__id=pin_id)
+            serializer = PinSerializer(pin_details.pin)  # Serialize the related Pin object
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except UserCollection.DoesNotExist:
+            return Response({"error": "Pin not found in your collection."}, status=status.HTTP_404_NOT_FOUND)
 # API view for user wishlists
 class WishlistAPIView(APIView):
     permission_classes = [IsAuthenticated]
