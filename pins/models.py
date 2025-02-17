@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import CustomUser
 
 class Series(models.Model):
     name = models.CharField(max_length=255)
@@ -40,25 +40,16 @@ class Pin(models.Model):
     
 
 class UserCollection(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.pin.name}"
+        return f"{self.user.useremail} - {self.pin.name}"
 
 
 class Wishlist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
-    added_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - Wishlist - {self.pin.name}"
-
-
-class Tradelist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
