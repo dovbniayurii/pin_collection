@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserSignupSerializer, UserSigninSerializer
-from .models import CustomUser,OTP
+from .models import PinUser,OTP
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .serializers import ResetPasswordSerializer,OTPVerificationSerializer
@@ -64,8 +64,8 @@ class ForgotPasswordView(APIView):
         if serializer.is_valid():
             email = serializer.validated_data['email']
             try:
-                user = CustomUser.objects.get(useremail=email)
-            except CustomUser.DoesNotExist:
+                user = PinUser.objects.get(useremail=email)
+            except PinUser.DoesNotExist:
                 return Response({"error": "User with this email doesn't exist."}, status=status.HTTP_400_BAD_REQUEST)
             
             otp_instance = OTP.generate_otp(user)
@@ -99,8 +99,8 @@ class VerifyOTPView(APIView):
             email = serializer.validated_data['email']
             
             try:
-                user = CustomUser.objects.get(useremail=email)
-            except CustomUser.DoesNotExist:
+                user = PinUser.objects.get(useremail=email)
+            except PinUser.DoesNotExist:
                 return Response({"email": "User with this email does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
             otp_instance = OTP.objects.filter(user__useremail=email, otp=otp_value).order_by('-created_at').first()

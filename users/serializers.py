@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser,OTP
+from .models import PinUser,OTP
 
 class UserSignupSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = CustomUser
+        model = PinUser
         fields = ['useremail', 'password', 'confirm_password']
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -18,7 +18,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('confirm_password')  # Remove confirm_password before saving
-        user = CustomUser.objects.create_user(**validated_data)
+        user = PinUser.objects.create_user(**validated_data)
         return user
 
 
@@ -44,7 +44,7 @@ class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
-        if not CustomUser.objects.filter(useremail=value).exists():
+        if not PinUser.objects.filter(useremail=value).exists():
             raise serializers.ValidationError("No user found with this email.")
         return value
     
