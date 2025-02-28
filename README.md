@@ -5,8 +5,8 @@ This is a Django project that includes RESTful APIs for user signup and signin, 
 ## Project Structure
 
 ```
-my_django_project
-├── my_django_project
+pin_tracker_app
+├── pin_tracker_app
 │   ├── __init__.py
 │   ├── asgi.py
 │   ├── settings.py
@@ -46,7 +46,7 @@ my_django_project
 1. **Clone the repository:**
    ```
    git clone <repository-url>
-   cd my_django_project
+   cd pin_tracker_app
    ```
 
 2. **Create a virtual environment:**
@@ -61,7 +61,7 @@ my_django_project
    ```
 
 4. **Configure the database:**
-   Update the `DATABASES` setting in `my_django_project/settings.py` to connect to your GCP PostgreSQL database.
+   Update the `DATABASES` setting in `pin_tracker_app/settings.py` to connect to your GCP PostgreSQL database.
 
 5. **Run migrations:**
    ```
