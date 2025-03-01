@@ -8,7 +8,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PinUser
-        fields = ['useremail', 'password', 'confirm_password']
+        fields = ['useremail','phone_number' ,'password','confirm_password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
@@ -40,13 +40,14 @@ class UserSigninSerializer(serializers.Serializer):
         raise serializers.ValidationError("Invalid credentials.")
 
 
-class ForgotPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+class OTPSendSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False)
+    phone_number = serializers.CharField(required=False)
 
-    def validate_email(self, value):
-        if not PinUser.objects.filter(useremail=value).exists():
-            raise serializers.ValidationError("No user found with this email.")
-        return value
+    def validate(self, data):
+        if not data.get('email') and not data.get('phone_number'):
+            raise serializers.ValidationError("Either email or phone number is required.")
+        return data
     
 class ResetPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True, min_length=6)
@@ -63,5 +64,11 @@ class ResetPasswordSerializer(serializers.Serializer):
         user.save()
 
 class OTPVerificationSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    otp = serializers.CharField(max_length=6)
+    email = serializers.EmailField(required=False)
+    phone_number = serializers.CharField(required=False)
+    otp = serializers.CharField(max_length=4)
+
+    def validate(self, data):
+        if not data.get('email') and not data.get('phone_number'):
+            raise serializers.ValidationError("Either email or phone number is required.")
+        return data

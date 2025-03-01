@@ -3,10 +3,10 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 class PinUserManager(BaseUserManager):
-    def create_user(self, useremail, password=None):
+    def create_user(self, useremail,phone_number, password=None):
         if not useremail:
             raise ValueError(_('The Useremail field must be set'))
-        user = self.model(useremail=self.normalize_email(useremail))
+        user = self.model(useremail=self.normalize_email(useremail),phone_number=phone_number)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -19,6 +19,7 @@ class PinUserManager(BaseUserManager):
 
 class PinUser(AbstractBaseUser):
     useremail = models.EmailField(unique=True, max_length=255)
+    phone_number = models.CharField(max_length=15,default='008')
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
@@ -57,7 +58,7 @@ class OTP(models.Model):
 
     @classmethod
     def generate_otp(cls, user):
-        otp_value = ''.join(random.choices(string.digits, k=6))  # Generate a 6-digit OTP
+        otp_value = ''.join(random.choices(string.digits, k=4))  # Generate a 6-digit OTP
         expires_at = timezone.now() + timezone.timedelta(minutes=10)  # OTP expires in 10 minutes
         otp_instance = cls.objects.create(user=user, otp=otp_value, expires_at=expires_at)
         return otp_instance

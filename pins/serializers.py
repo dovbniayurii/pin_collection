@@ -12,17 +12,13 @@ class TagSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PinSerializer(serializers.ModelSerializer):
-    # Include related Series data
-    series = SeriesSerializer(read_only=True)
-    # Format tags as a list
-    tags = serializers.SerializerMethodField()
-
     class Meta:
         model = Pin
-        fields = '__all__'
+        fields = [
+            'name', 'series_name', 'rarity', 'origin', 'edition', 'release_date',
+            'original_price', 'sku', 'description', 'image_url', 'image', 'tags'
+        ]
 
-    def get_tags(self, obj):
-        return obj.get_tags_as_list()
 
 class UserCollectionSerializer(serializers.ModelSerializer):
     # Include related Pin data

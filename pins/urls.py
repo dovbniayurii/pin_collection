@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from .views import SeriesViewSet, TagViewSet, PinViewSet,UserPinDetailAPIView,UserCollectionAPIView,WishlistAPIView,TradingBoardAPIView
+from .views import SeriesViewSet, TagViewSet, PinViewSet,CreatePinAPIView,UserPinDetailAPIView,UserCollectionAPIView,WishlistAPIView,TradingBoardAPIView
 from django.urls import path, include
 from . import views
 
@@ -17,7 +17,7 @@ urlpatterns = [
     path('pin-details/<int:pin_id>/', UserPinDetailAPIView.as_view(), name='user-collection'),
     path('wishlist/', WishlistAPIView.as_view(), name='wishlist'),
     path('trading-board/', TradingBoardAPIView.as_view(), name='trading_board'),
-    
+    path('create-pin/', CreatePinAPIView.as_view(), name='create-pin'),
     #path('api/', include(router.urls)),  # Include the API routes under `/api/`
 
 ]

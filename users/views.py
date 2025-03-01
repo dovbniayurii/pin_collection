@@ -10,7 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .serializers import UserSignupSerializer, UserSigninSerializer, ForgotPasswordSerializer, OTPVerificationSerializer, ResetPasswordSerializer
+from .serializers import UserSignupSerializer, UserSigninSerializer, OTPSendSerializer, OTPVerificationSerializer, ResetPasswordSerializer
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -47,38 +47,64 @@ class SigninView(APIView):
         if serializer.is_valid():
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+from twilio.rest import Client
+def send_sms(phone_number,message):
+    print(phone_number,message)
+    # Initialize the Twilio client with your credentials
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
+    # Send an SMS
+    message = client.messages.create(
+        body=message,  # The content of the SMS
+        from_=settings.TWILIO_PHONE_NUMBER,  # Your Twilio phone number
+        to=phone_number  # The recipient's phone number
+    )
 
+    return message.sid  # This returns the unique SID of the message
 class ForgotPasswordView(APIView):
     @swagger_auto_schema(
-        request_body=ForgotPasswordSerializer,
-        responses={200: openapi.Response("OTP sent to email")},
+        request_body=OTPSendSerializer,
+        responses={200: openapi.Response("OTP sent successfully")},
     )
     def post(self, request):
         """
-        Forgot Password API
-        
-        Sends an OTP to reset the password.
+        Send OTP API
+
+        Sends an OTP to the provided email or phone number.
         """
-        serializer = ForgotPasswordSerializer(data=request.data)
+        serializer = OTPSendSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data['email']
-            try:
-                user = PinUser.objects.get(useremail=email)
-            except PinUser.DoesNotExist:
-                return Response({"error": "User with this email doesn't exist."}, status=status.HTTP_400_BAD_REQUEST)
-            
+            email = serializer.validated_data.get('email')
+            phone_number = serializer.validated_data.get('phone_number')
+
+            user = None
+
+            if email:
+                try:
+                    user = PinUser.objects.get(useremail=email)
+                except PinUser.DoesNotExist:
+                    return Response({"email": "User with this email does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
+            elif phone_number:
+                try:
+                    user = PinUser.objects.get(phone_number=phone_number)
+                except PinUser.DoesNotExist:
+                    return Response({"phone_number": "User with this phone number does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
             otp_instance = OTP.generate_otp(user)
-            send_mail(
-                subject="Reset Your Password",
-                message=f"Your OTP for password reset is: {otp_instance.otp}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            
-            return Response({"message": "OTP sent to your email."}, status=status.HTTP_200_OK)
-        
+
+            if email:
+                send_mail(
+                    'Your OTP Code',
+                    f'Your OTP is: {otp_instance.otp}',
+                    'no-reply@example.com',
+                    [email],
+                )
+            elif phone_number:
+                send_sms(phone_number, f'Your OTP is: {otp_instance.otp}')
+
+            return Response({"message": "OTP sent successfully."}, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -90,39 +116,45 @@ class VerifyOTPView(APIView):
     def post(self, request):
         """
         Verify OTP API
-        
+
         Verifies the OTP and returns an authentication token.
         """
         serializer = OTPVerificationSerializer(data=request.data)
         if serializer.is_valid():
             otp_value = serializer.validated_data['otp']
-            email = serializer.validated_data['email']
-            
-            try:
-                user = PinUser.objects.get(useremail=email)
-            except PinUser.DoesNotExist:
-                return Response({"email": "User with this email does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            email = serializer.validated_data.get('email')
+            phone_number = serializer.validated_data.get('phone_number')
 
-            otp_instance = OTP.objects.filter(user__useremail=email, otp=otp_value).order_by('-created_at').first()
+            try:
+                if email:
+                    user = PinUser.objects.get(useremail=email)
+                    otp_instance = OTP.objects.filter(user__useremail=email, otp=otp_value).order_by('-created_at').first()
+                elif phone_number:
+                    user = PinUser.objects.get(phone_number=phone_number)
+                    otp_instance = OTP.objects.filter(user__phone_number=phone_number, otp=otp_value).order_by('-created_at').first()
+                else:
+                    return Response({"error": "Provide either email or phone number."}, status=status.HTTP_400_BAD_REQUEST)
+            except PinUser.DoesNotExist:
+                return Response({"error": "User not found."}, status=status.HTTP_400_BAD_REQUEST)
 
             if not otp_instance:
                 return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             if otp_instance.is_expired():
                 return Response({"error": "OTP has expired."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
 
             otp_instance.delete()
-            
+
             return Response({
                 "message": "OTP verified successfully.",
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
                 'useremail': user.useremail,
+                'phone_number': user.phone_number
             }, status=status.HTTP_200_OK)
-            
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
