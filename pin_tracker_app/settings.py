@@ -12,7 +12,12 @@ SECRET_KEY = 'your-secret-key'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "10.0.2.2",  # Add this for Android emulator
+    "192.168.1.100",  # If using a real device,  local IP
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -26,6 +31,8 @@ INSTALLED_APPS = [
     'pins',
     'drf_yasg',
     'users',
+    "corsheaders",
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -36,6 +43,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = 'pin_tracker_app.urls'
@@ -124,3 +132,17 @@ SWAGGER_SETTINGS = {
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=BASE_DIR / 'media'
+
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (for testing)
+
+#EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+ANYMAIL = {
+    'MAILGUN_API_KEY': '0f719217436cf7177a4069a14aa2c874-ac3d5f74-cad9e47d',  #  Mailgun API key
+    'MAILGUN_SENDER_DOMAIN': 'your-domain.com',  #  domain
+}
+
+TWILIO_ACCOUNT_SID = ''  #  Twilio Account SID
+TWILIO_AUTH_TOKEN = '3ae93a99fef10a285952fa55256c186f'    #  Twilio Auth Token
+TWILIO_PHONE_NUMBER = 'your_twilio_phone_number'  #  Twilio phone number
+
+
