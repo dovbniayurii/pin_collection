@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import PinUser,OTP
+from .models import PinUser,OTP,FCMToken
 
 class UserSignupSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -72,3 +72,7 @@ class OTPVerificationSerializer(serializers.Serializer):
         if not data.get('email') and not data.get('phone_number'):
             raise serializers.ValidationError("Either email or phone number is required.")
         return data
+class FCMTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FCMToken
+        fields = ['token']

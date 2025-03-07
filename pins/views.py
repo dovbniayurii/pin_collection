@@ -97,7 +97,7 @@ class CreatePinAPIView(APIView):
                 
                 test_embedding = generate_embedding(image_data)
                 if test_embedding:
-                    pc = Pinecone(api_key="pcsk_6pkmwU_5WC2wWq5j4KGq8S1QgLGnGkByZroAcSHRKLDh2YnjgfssPqomenV6ZkAPv7SaxM")
+                    pc = Pinecone(api_key=settings.Pinecone_Api_Key)
                     index_name = "pin-collection-image-prod"
                     index = pc.Index(index_name)
                     # Perform similarity search in Pinecone
@@ -105,8 +105,7 @@ class CreatePinAPIView(APIView):
 
                     # Display the results
                     for match in search_results["matches"]:
-                        print(f"ID: {match['id']}, Score: {match['score']}")
-                        print(f"Metadata: {match['metadata']}")
+                        
                         # Create Pin instance
                         pin_data = match['metadata']
                         release_date_str = pin_data.get('release_date', '').strip()
@@ -188,7 +187,7 @@ class WishlistAPIView(APIView):
 
     # Retrieve the user's wishlist
     def get(self, request):
-        wishlist = Wishlist.objects.filter(user=request.user)
+        wishlist = Wishlist.objects.filter(user=request.user)[:0]
         serializer = WishlistSerializer(wishlist, many=True)
         return Response(serializer.data)
     
@@ -198,6 +197,6 @@ class TradingBoardAPIView(APIView):
 
     # Retrieve the user's wishlist
     def get(self, request):
-        trading = TradingBoard.objects.filter(user=request.user)
+        trading = TradingBoard.objects.filter(user=request.user)[:0]
         serializer = TradingBoardSerializer(trading, many=True)
         return Response(serializer.data)
