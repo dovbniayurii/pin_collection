@@ -19,7 +19,7 @@ class PinUserManager(BaseUserManager):
 
 class PinUser(AbstractBaseUser):
     useremail = models.EmailField(unique=True, max_length=255)
-    phone_number = models.CharField(max_length=15,default='008')
+    phone_number = models.CharField(max_length=15)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
@@ -62,3 +62,9 @@ class OTP(models.Model):
         expires_at = timezone.now() + timezone.timedelta(minutes=10)  # OTP expires in 10 minutes
         otp_instance = cls.objects.create(user=user, otp=otp_value, expires_at=expires_at)
         return otp_instance
+
+
+class FCMToken(models.Model):
+    #user = models.OneToOneField(User, on_delete=models.CASCADE)
+    token = models.TextField()
+    updated_at = models.DateTimeField(auto_now=True)

@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserSignupSerializer, UserSigninSerializer
-from .models import PinUser,OTP
+from .models import PinUser,OTP,FCMToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .serializers import ResetPasswordSerializer,OTPVerificationSerializer
@@ -48,19 +48,24 @@ class SigninView(APIView):
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 from twilio.rest import Client
-def send_sms(phone_number,message):
-    print(phone_number,message)
-    # Initialize the Twilio client with your credentials
-    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+from twilio.base.exceptions import TwilioRestException
 
-    # Send an SMS
-    message = client.messages.create(
-        body=message,  # The content of the SMS
-        from_=settings.TWILIO_PHONE_NUMBER,  # Your Twilio phone number
-        to=phone_number  # The recipient's phone number
-    )
+def send_sms(phone_number, message):
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            body=message,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            to=phone_number
+        )
+        return message.sid
+    except TwilioRestException as e:
+        print(f"Twilio Error: {e}")
+        raise
+    except Exception as e:
+        print(f"General Error: {e}")
+        raise
 
-    return message.sid  # This returns the unique SID of the message
 class ForgotPasswordView(APIView):
     @swagger_auto_schema(
         request_body=OTPSendSerializer,
@@ -72,6 +77,7 @@ class ForgotPasswordView(APIView):
 
         Sends an OTP to the provided email or phone number.
         """
+        print(request.data)
         serializer = OTPSendSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
@@ -104,7 +110,7 @@ class ForgotPasswordView(APIView):
                 send_sms(phone_number, f'Your OTP is: {otp_instance.otp}')
 
             return Response({"message": "OTP sent successfully."}, status=status.HTTP_200_OK)
-
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -177,3 +183,34 @@ class ResetPasswordView(APIView):
             serializer.save(user=request.user)
             return Response({"message": "Password reset successfully."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+        
+        
+class SaveFCMToken(APIView):
+    #permission_classes = [IsAuthenticated]  # Require authentication
+
+    def post(self, request):
+        token = request.data.get('token')
+        #user = request.user
+
+        if not token:
+            return Response({"error": "Token is required"}, status=400)
+
+        # Update or create FCM token
+        fcm_token, created = FCMToken.objects.update_or_create(
+         #   user=user,
+            defaults={"token": token}
+        )
+
+        return Response({"message": "Token saved successfully", "token": token})
+    
+    
+from django.http import HttpResponse
+from .tasks import my_task,send_morning_push_notification
+
+def call_task(request):
+    # Calling the task asynchronously
+    send_morning_push_notification.delay()
+    return HttpResponse("Task has been called!")
