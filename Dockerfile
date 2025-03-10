@@ -1,42 +1,28 @@
-name: CI/CD Pipeline
+FROM python:3.10-slim
 
-on:
-  push:
-    branches:
-      - main
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# Set the working directory inside the container
+WORKDIR /app
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        version: 'latest'
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+# Install Python dependencies
+COPY requirements.txt /app/
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+# Copy the rest of the application code to the working directory
+COPY . /app/
 
-    - name: Configure Docker
-      run: gcloud auth configure-docker
+# Expose the port the app runs on
+EXPOSE 8000
 
-    - name: Build Docker image
-      run: docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/pin-collection:$GITHUB_SHA .
-
-    - name: Push Docker image
-      run: docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/pin-collection:$GITHUB_SHA
-
-    - name: Deploy to GCP
-      run: |
-        gcloud run deploy pin-collection \
-          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/pin-collection:$GITHUB_SHA \
-          --platform managed \
-          --region us-central1 \
-          --allow-unauthenticated
+# Run database migrations and start the Django development server
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
