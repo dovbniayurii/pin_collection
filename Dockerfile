@@ -21,8 +21,8 @@ RUN pip install -r requirements.txt
 # Copy the rest of the application code to the working directory
 COPY . /app/
 
-# Expose the port the app runs on
-EXPOSE 8000
+# Expose the port the app runs on (optional, Cloud Run uses $PORT)
+EXPOSE $PORT
 
-# Run database migrations and start the Django development server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000]
+# Run database migrations and start the Django development server using $PORT
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:${PORT}"]
