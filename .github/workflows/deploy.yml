@@ -40,3 +40,4 @@ jobs:
           --platform managed \
           --region us-central1 \
           --allow-unauthenticated
+          --timeout=300s
