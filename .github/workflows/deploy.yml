@@ -36,7 +36,8 @@ jobs:
     - name: Deploy to GCP
       run: |
         gcloud run deploy pin-collection \
-          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/pin-collection:$GITHUB_SHA \
-          --platform managed \
-          --region us-central1 \
-          --allow-unauthenticated
+            --image gcr.io/***/pin-collection:$GITHUB_SHA \
+            --platform managed \
+            --region us-central1 \
+            --port 8000 \
+            --allow-unauthenticated
