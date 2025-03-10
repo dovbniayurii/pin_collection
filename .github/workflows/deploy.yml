@@ -18,10 +18,11 @@ jobs:
       with:
         version: 'latest'
         project_id: ${{ secrets.GCP_PROJECT_ID }}
-        service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
     - name: Authenticate to Google Cloud
-      run: gcloud auth activate-service-account --key-file=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
     - name: Configure Docker
       run: gcloud auth configure-docker
