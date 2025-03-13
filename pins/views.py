@@ -181,7 +181,14 @@ class UserPinDetailAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except UserCollection.DoesNotExist:
             return Response({"error": "Pin not found in your collection."}, status=status.HTTP_404_NOT_FOUND)
-# API view for user wishlists
+    def delete(self, request, pin_id):
+        """Delete a specific pin from the user's collection."""
+        try:
+            pin = UserCollection.objects.get(user=request.user, id=pin_id)
+            pin.delete()
+            return Response({"message": "Pin removed successfully."}, status=status.HTTP_200_OK)
+        except UserCollection.DoesNotExist:
+            return Response({"error": "Pin not found in your collection."}, status=status.HTTP_404_NOT_FOUND)# API view for user wishlists
 class WishlistAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
