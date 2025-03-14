@@ -4,3 +4,4 @@ env
 venv
 pin_tracker_app/.env
 **/.env
+*.pyc

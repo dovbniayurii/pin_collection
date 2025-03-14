@@ -97,7 +97,7 @@ class CreatePinAPIView(APIView):
                 
                 test_embedding = generate_embedding(image_data)
                 if test_embedding:
-                    pc = Pinecone(api_key=settings.Pinecone_Api_Key)
+                    pc = Pinecone(api_key=settings.PINECONE_API_KEY)
                     index_name = "pin-collection-image-prod"
                     index = pc.Index(index_name)
                     # Perform similarity search in Pinecone

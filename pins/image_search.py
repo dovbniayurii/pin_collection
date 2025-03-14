@@ -46,21 +46,3 @@ def generate_embedding_from_base64(image_base64):
     except Exception as e:
         print(f"Error generating embedding: {e}")
         return None
-    
-# Test image input (replace with your image URL or local path)
-test_image_url = "https://pinandpop.s3.amazonaws.com/images/pinails/91083_TUGm_pinail.jpg"
-
-# Generate embedding for the test image
-test_embedding = generate_embedding(test_image_url) # use this function: generate_embedding_from_base64(base64 image) if you want to use base64 image.
-
-
-if test_embedding:
-    # Perform similarity search in Pinecone
-    search_results = index.query(vector=test_embedding, top_k=5, include_metadata=True)
-
-    # Display the results
-    for match in search_results["matches"]:
-        print(f"ID: {match['id']}, Score: {match['score']}")
-        print(f"Metadata: {match['metadata']}")
-else:
-    print("Failed to generate embedding for the test image.")

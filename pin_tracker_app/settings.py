@@ -153,7 +153,7 @@ TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
 
 # Pinecone 
-Pinecone_Api_Key = os.getenv('Pinecone_Api_Key')
+PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 
 CELERY_TIMEZONE = "America/New_York"
 #CELERY_TIMEZONE = 'Asia/Dhaka'
