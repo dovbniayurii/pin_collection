@@ -8,7 +8,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PinUser
-        fields = ['useremail','phone_number' ,'password','confirm_password']
+        fields = ['useremail' ,'password','confirm_password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
@@ -19,25 +19,17 @@ class UserSignupSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('confirm_password')  # Remove confirm_password before saving
         user = PinUser.objects.create_user(**validated_data)
+        user.is_active = False
+        user.save()
         return user
-
+class PhoneNumberUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PinUser
+        fields = ["phone_number"]
 
 class UserSigninSerializer(serializers.Serializer):
     useremail = serializers.CharField()
     password = serializers.CharField(write_only=True)
-    
-    def validate(self, data):
-        from django.contrib.auth import authenticate
-        user = authenticate(**data)
-        if user and user.is_active:
-            refresh = RefreshToken.for_user(user)
-            return {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'useremail': user.useremail,
-                #'email': user.email,
-            }
-        raise serializers.ValidationError("Invalid credentials.")
 
 
 class OTPSendSerializer(serializers.Serializer):
@@ -67,7 +59,6 @@ class OTPVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     phone_number = serializers.CharField(required=False)
     otp = serializers.CharField(max_length=4)
-
     def validate(self, data):
         if not data.get('email') and not data.get('phone_number'):
             raise serializers.ValidationError("Either email or phone number is required.")

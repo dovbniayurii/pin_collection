@@ -3,10 +3,10 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 class PinUserManager(BaseUserManager):
-    def create_user(self, useremail,phone_number, password=None):
+    def create_user(self, useremail, password=None):
         if not useremail:
             raise ValueError(_('The Useremail field must be set'))
-        user = self.model(useremail=self.normalize_email(useremail),phone_number=phone_number)
+        user = self.model(useremail=self.normalize_email(useremail))
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -19,9 +19,10 @@ class PinUserManager(BaseUserManager):
 
 class PinUser(AbstractBaseUser):
     useremail = models.EmailField(unique=True, max_length=255)
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15,blank=True,null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_number_verified = models.BooleanField(default=False)
 
     objects = PinUserManager()
 
