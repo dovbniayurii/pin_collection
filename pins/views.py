@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Series, Tag, Pin,UserCollection,Wishlist,TradingBoard
 from .serializers import SeriesSerializer, TagSerializer, PinSerializer,UserCollectionSerializer,WishlistSerializer,TradingBoardSerializer
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -105,33 +105,34 @@ class CreatePinAPIView(APIView):
 
                     # Display the results
                     for match in search_results["matches"]:
-                        
                         # Create Pin instance
                         pin_data = match['metadata']
                         release_date_str = pin_data.get('release_date', '').strip()
-                        release_date = None 
+                        release_date = None
+
                         if release_date_str.lower() == 'unknown' or not release_date_str:
                             release_date = None  # or use a default date like datetime(2000, 1, 1).date()
                         else:
-                            release_date = datetime.strptime(release_date_str, '%Y-%m-%d').date()
-                        pin = Pin(
-                        name=pin_data['name'],
-                        series_name=pin_data['series'],
-                        rarity=pin_data['rarity'],
-                        origin=pin_data['origin'],
-                        edition=pin_data['edition'],
-                        release_date=release_date,
-                        original_price=pin_data['original_price'],
-                        sku=pin_data['sku'],
-                        description=pin_data['description'],
-                        image_url=pin_data['image_url'],
-                        tags=pin_data.get('tags', '')  # Handle optional tags
-                    )   
-                        pin.image.save(file_name, image_file)
-                        UserCollection.objects.create(pin=pin,user=request.user)
-                        pin.save()
+                            try:
+                                release_date = datetime.strptime(release_date_str, '%Y-%m-%d').date()
+                            except ValueError:
+                                release_date = None  # Handle incorrect date formats gracefully
+
+                        # Prepare pin data dictionary
+                        pin_data['release_date'] = release_date
+                        pin_data['tags'] = pin_data.get('tags', '')  # Handle optional tags
+
+                        serializer = PinSerializer(data=pin_data)
+
+                        if serializer.is_valid():
+                            pin = serializer.save()  # Save the object
+                            pin.image.save(file_name, image_file)  # Save the image file separately
+                            print(serializer.data)
+                            return Response(serializer.data, status=201)  # Return successful response
+                        else:
+                            print(serializer.errors)
+                            return Response(serializer.errors, status=400)    
                         
-                        print('saved')
                 else:
                     return Response({'error':"Failed to generate embedding for the test image."},status=status.HTTP_400_BAD_REQUEST)
                 
@@ -156,18 +157,29 @@ class UserCollectionAPIView(APIView):
         user_collection = UserCollection.objects.filter(user=request.user)
         serializer = UserCollectionSerializer(user_collection, many=True)
         return Response(serializer.data)
-    # Add a pin to the user's collection (POST method)
-    #@swagger_auto_schema(
-     #   request_body=UserCollectionSerializer,  # Only for methods that send data
-     #   responses={201: UserCollectionSerializer()}
-    #)
-    #def post(self, request):
-     #   request.data['user'] = request.user.id
-      #  serializer = UserCollectionSerializer(data=request.data)
-       # if serializer.is_valid():
-        #    serializer.save()
-         #   return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        print(request.data)
+        pin_id = request.data.get('id')
+        if not pin_id:
+            return Response({'error': 'Pin ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch the existing Pin instance
+        pin = get_object_or_404(Pin, id=pin_id)
+        
+        existing_entry = UserCollection.objects.filter(user=request.user, pin=pin).exists()
+        if existing_entry:
+            return Response({'error': 'Pin is already in user collection'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Add the user ID to the request data
+        request.data['user'] = request.user.id
+
+        # Create the UserCollection entry
+        serializer = UserCollectionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(pin=pin)  # Associate the existing pin
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserPinDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -184,10 +196,11 @@ class UserPinDetailAPIView(APIView):
     def delete(self, request, pin_id):
         """Delete a specific pin from the user's collection."""
         try:
-            pin = UserCollection.objects.get(user=request.user, id=pin_id)
+            print(pin_id)
+            pin = Pin.objects.get(id=pin_id)
             pin.delete()
             return Response({"message": "Pin removed successfully."}, status=status.HTTP_200_OK)
-        except UserCollection.DoesNotExist:
+        except Pin.DoesNotExist:
             return Response({"error": "Pin not found in your collection."}, status=status.HTTP_404_NOT_FOUND)# API view for user wishlists
 class WishlistAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -197,6 +210,29 @@ class WishlistAPIView(APIView):
         wishlist = Wishlist.objects.filter(user=request.user)[:0]
         serializer = WishlistSerializer(wishlist, many=True)
         return Response(serializer.data)
+    def post(self, request):
+        pin_id = request.data.get('id')
+        if not pin_id:
+            return Response({'error': 'Pin ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch the existing Pin instance
+        pin = get_object_or_404(Pin, id=pin_id)
+        
+        existing_entry = Wishlist.objects.filter(user=request.user, pin=pin).exists()
+        if existing_entry:
+            return Response({'error': 'Pin is already in Wishlist'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Add the user ID to the request data
+        request.data['user'] = request.user.id
+
+        # Create the UserCollection entry
+        serializer = WishlistSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(pin=pin)  # Associate the existing pin
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 # API view for user wishlists
 class TradingBoardAPIView(APIView):
@@ -207,3 +243,26 @@ class TradingBoardAPIView(APIView):
         trading = TradingBoard.objects.filter(user=request.user)[:0]
         serializer = TradingBoardSerializer(trading, many=True)
         return Response(serializer.data)
+    def post(self, request):
+        print(request.data)
+        pin_id = request.data.get('id')
+        if not pin_id:
+            return Response({'error': 'Pin ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch the existing Pin instance
+        pin = get_object_or_404(Pin, id=pin_id)
+        
+        existing_entry = TradingBoard.objects.filter(user=request.user, pin=pin).exists()
+        if existing_entry:
+            return Response({'error': 'Pin is already in Trading Board'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Add the user ID to the request data
+        request.data['user'] = request.user.id
+
+        # Create the UserCollection entry
+        serializer = TradingBoardSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(pin=pin)  # Associate the existing pin
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

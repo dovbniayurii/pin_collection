@@ -22,7 +22,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "10.0.2.2",  # Add this for Android emulator
-    "192.168.1.100",  # If using a real device,  local IP
+    "108.181.199.70",  # If using a real device,  local IP
 ]
 
 INSTALLED_APPS = [

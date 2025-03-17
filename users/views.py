@@ -80,7 +80,7 @@ from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 
 def send_sms(phone_number, message):
-    return print(message)
+    #return print(message)
     try:
         client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         message = client.messages.create(

@@ -12,10 +12,11 @@ class TagSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PinSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)
     class Meta:
         model = Pin
         fields = [
-            'name', 'series_name', 'rarity', 'origin', 'edition', 'release_date',
+        'id','name', 'series_name', 'rarity', 'origin', 'edition', 'release_date',
             'original_price', 'sku', 'description', 'image_url', 'image', 'tags'
         ]
 
